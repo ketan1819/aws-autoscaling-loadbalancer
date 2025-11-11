@@ -62,6 +62,9 @@ Created ALB and Target Group:
 **Purpose**: ALB distributes traffic evenly across healthy instances and provides a single DNS endpoint.
 
 ![Load Balancer](ASG-SS/load-balancer.png)
+** Target Group Configuration ** :
+![Load Balancer](ASG-SS/tg1.png)
+![Load Balancer](ASG-SS/tg2.png)
 
 
 ---
@@ -69,13 +72,11 @@ Created ALB and Target Group:
 ## Step 4: Scaling Policies
 
 Implemented **Target Tracking Scaling** based on CPU:
-- **Scale-Out**: CPU > 70% → Add 1 instance
+- **Scale-Out**: CPU > 50% → Add 1 instance
 - **Scale-In**: CPU < 20% → Remove 1 instance
 - **Cool-down period**: 300 seconds
 
 **Purpose**: Automatically adjusts capacity based on demand, optimizing both performance and cost.
-
-![Scaling Policy](screenshots/step4_scaling_policy.png)
 
 ---
 
@@ -83,6 +84,18 @@ Implemented **Target Tracking Scaling** based on CPU:
 
 ### Load Balancer Test:
 Accessed ALB DNS in browser to verify traffic distribution across instances.
+![Load Balancer](ASG-SS/result.png)
+![Load Balancer](ASG-SS/result2.png)
+![Load Balancer](ASG-SS/running instances.png)
+
+### Result :- 
+When i use stress command it automatically auto-scaled the number of instances.
+when th ecpu load is about to cross 50 %
+
+![Load Balancer](ASG-SS/cpu.png)
+![Load Balancer](ASG-SS/cpu2.png)
+![Load Balancer](ASG-SS/final instances.png)
+
 
 ### Scale-Out Test:
 ```bash
@@ -93,10 +106,12 @@ sudo yum install stress -y
 stress --cpu 4 --timeout 300s
 ```
 
-**Result**: CPU exceeded 70%, ASG launched additional instance (2→3 instances).
+**Result**: CPU exceeded 50%, ASG launched additional instance (2→3 instances).
+![Load Balancer](ASG-SS/final instances.png)
 
 ### Scale-In Test:
 Stopped stress command, CPU dropped below 20%.
+![Load Balancer](ASG-SS/tg3.png)
 
 **Result**: After cool-down, ASG terminated extra instance (3→2 instances).
 
@@ -108,8 +123,6 @@ top
 # View system load
 uptime
 ```
-
-![Testing Results](screenshots/step5-testing-validation.png)
 
 ---
 
@@ -123,8 +136,6 @@ Deleted resources in order:
 5. Custom Security Groups
 
 **Important**: Always verify all resources are deleted to avoid unexpected AWS charges.
-
-![Cleanup Complete](screenshots/step6-cleanup.png)
 
 ---
 
@@ -153,17 +164,6 @@ uptime
 curl http://<ALB-DNS>
 ```
 
----
-
-## Setup Instructions
-
-1. Create `screenshots/` folder in your project
-2. Take screenshots after each step
-3. Save with names matching placeholders above
-4. Push to GitHub - images will auto-render
-
----
-
 ## Architecture
 
 ```
@@ -174,6 +174,8 @@ Internet → ALB → Target Group → ASG → EC2 Instances (Multi-AZ)
 
 ---
 
-**Date**: [Add Date]  
+**Date**: 11/11/2025  
 **AWS Services**: EC2, Auto Scaling, ALB, CloudWatch  
 **Purpose**: Learning cloud infrastructure automation and high availability
+
+## Author: Ketan Sonawane
