@@ -84,17 +84,17 @@ Implemented **Target Tracking Scaling** based on CPU:
 
 ### Load Balancer Test:
 Accessed ALB DNS in browser to verify traffic distribution across instances.
-![Load Balancer](ASG-SS/result.png)
-![Load Balancer](ASG-SS/result2.png)
-![Load Balancer](ASG-SS/running instances.png)
+![](ASG-SS/result.png)
+![](ASG-SS/result2.png)
+![](ASG-SS/running instances.png)
 
 ### Result :- 
 When i use stress command it automatically auto-scaled the number of instances.
 when th ecpu load is about to cross 50 %
 
-![Load Balancer](ASG-SS/cpu.png)
-![Load Balancer](ASG-SS/cpu2.png)
-![Load Balancer](ASG-SS/final instances.png)
+![](ASG-SS/cpu.png)
+![](ASG-SS/cpu2.png)
+![](ASG-SS/final instances.png)
 
 
 ### Scale-Out Test:
@@ -107,11 +107,11 @@ stress --cpu 4 --timeout 300s
 ```
 
 **Result**: CPU exceeded 50%, ASG launched additional instance (2→3 instances).
-![Load Balancer](ASG-SS/final instances.png)
+![](ASG-SS/final instances.png)
 
 ### Scale-In Test:
 Stopped stress command, CPU dropped below 20%.
-![Load Balancer](ASG-SS/tg3.png)
+![](ASG-SS/tg3.png)
 
 **Result**: After cool-down, ASG terminated extra instance (3→2 instances).
 
