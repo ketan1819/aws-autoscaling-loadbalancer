@@ -1,115 +1,175 @@
-# aws-autoscaling-loadbalancer
 Implementation of AWS Auto Scaling with Load Balancer
 
-# AWS Auto Scaling with Load Balancer – Implementation & Learning
+# AWS Auto Scaling with Load Balancer
 
 ## Introduction
-In this project, I explored **AWS Auto Scaling** and **Load Balancer** to automatically manage EC2 instances based on traffic.  
-This README documents my **learning experience, implementation steps, testing, and observations**.
+
+This project implements **AWS Auto Scaling** with an **Application Load Balancer (ALB)** to automatically manage EC2 instances based on traffic demand. The system scales up during high traffic and scales down during low traffic, ensuring high availability and cost optimization.
+
+### Key Components:
+- **EC2 Instances**: Virtual servers running the application
+- **Auto Scaling Group (ASG)**: Automatically adjusts instance count
+- **Application Load Balancer (ALB)**: Distributes traffic across instances
+- **Launch Template**: Defines instance configuration
+- **CloudWatch**: Monitors metrics and triggers scaling
 
 ---
 
-## Step 1: Launch Template and EC2 Instances
-- Created a **custom AMI** with my application installed.  
-- Defined a **Launch Template** including AMI, instance type, security group, and key pair.  
-- EC2 instances launched automatically through the **Auto Scaling Group (ASG)**.  
+## Step 1: Launch Template Setup
 
-**Screenshot Placeholder:**  
-![Add Launch Template Screenshot Here](screenshots/step1_launch_template.png)
+Created a **Launch Template** with:
+- Custom AMI with application pre-installed
+- Instance type: t2.micro
+- Security group: HTTP (80) and SSH (22) access
+- User data script to auto-start web server
 
----
+**Purpose**: Launch Template ensures all instances have identical configurations.
 
-## Step 2: Auto Scaling Group (ASG) Setup
-- Configured ASG with:  
-  - Minimum: 1 instance  
-  - Desired: 2 instances  
-  - Maximum: 4 instances  
-- Linked the Launch Template to ASG for automated scaling.  
+![Launch Template](ASG-SS/1.png)
+![Launch Template](ASG-SS/2.png)
+![Launch Template](ASG-SS/13.png)
+![Launch Template](ASG-SS/3.png)
 
-**Screenshot Placeholder:**  
-![Add ASG Setup Screenshot Here](screenshots/step2_asg.png)
 
 ---
 
-## Step 3: High Availability with Load Balancer
-- Configured ASG to span **multiple Availability Zones (AZs)**.  
-- Created **Application Load Balancer (ALB)** and attached a **Target Group**.  
-- Enabled **ELB health checks** to route traffic only to healthy instances.  
+## Step 2: Auto Scaling Group (ASG)
 
-**Screenshot Placeholder:**  
-![Add ALB Setup Screenshot Here](screenshots/step3_alb.png)
+Configured ASG with:
+- **Minimum**: 1 instance
+- **Desired**: 2 instances
+- **Maximum**: 4 instances
+- Multiple Availability Zones for high availability
+- Health check grace period: 300 seconds
+
+**How it works**: ASG maintains the desired number of healthy instances. If an instance fails, it's automatically replaced.
+
+![Auto Scaling Group](screenshots/step2_asg.png)
+
+---
+
+## Step 3: Application Load Balancer
+
+Created ALB and Target Group:
+- **ALB**: Internet-facing, spans multiple AZs
+- **Target Group**: HTTP port 80
+- **Health checks**: Every 30 seconds, 2 consecutive checks for healthy/unhealthy status
+- Registered ASG with Target Group
+
+**Purpose**: ALB distributes traffic evenly across healthy instances and provides a single DNS endpoint.
+
+![Load Balancer](screenshots/step3_alb.png)
 
 ---
 
-## Step 4: Dynamic Scaling Policies
-- Implemented **scale-out** and **scale-in policies** based on **CPU Utilization**:  
-  - Scale out: CPU > 70%  
-  - Scale in: CPU < 20%  
-- Set **cool-down periods** to prevent rapid scaling.  
+## Step 4: Scaling Policies
 
-**Screenshot Placeholder:**  
-![Add Scaling Policy Screenshot Here](screenshots/step4_scaling_policy.png)
+Implemented **Target Tracking Scaling** based on CPU:
+- **Scale-Out**: CPU > 70% → Add 1 instance
+- **Scale-In**: CPU < 20% → Remove 1 instance
+- **Cool-down period**: 300 seconds
+
+**Purpose**: Automatically adjusts capacity based on demand, optimizing both performance and cost.
+
+![Scaling Policy](screenshots/step4_scaling_policy.png)
 
 ---
+
 ## Step 5: Testing & Validation
 
-- Tested load balancer by accessing the **ALB DNS** in a browser or using a simple request.
+### Load Balancer Test:
+Accessed ALB DNS in browser to verify traffic distribution across instances.
 
-- Simulated traffic using the **stress** command on EC2 instances to trigger CPU-based scaling:
+### Scale-Out Test:
 ```bash
-  sudo yum install stress -y                    # Install stress tool
-  stress --cpu 4 --timeout 300s                 # Stress CPU for 5 minutes
+# Install stress tool
+sudo yum install stress -y
+
+# Generate high CPU load for 5 minutes
+stress --cpu 4 --timeout 300s
 ```
 
-- Observed scale-out events when CPU utilization exceeded the target threshold.
-- Observed scale-in events after the stress test completed and CPU utilization dropped.
-- Monitored the scaling activities in the AWS Auto Scaling console.
+**Result**: CPU exceeded 70%, ASG launched additional instance (2→3 instances).
 
-**Screenshot Placeholder:**
+### Scale-In Test:
+Stopped stress command, CPU dropped below 20%.
 
-![Testing & Validation](screenshots/step5-testing-validation.png)
+**Result**: After cool-down, ASG terminated extra instance (3→2 instances).
+
+### Monitoring:
+```bash
+# Check CPU usage
+top
+
+# View system load
+uptime
+```
+
+![Testing Results](screenshots/step5-testing-validation.png)
 
 ---
 
 ## Step 6: Cleanup
 
-- Deleted Auto Scaling Group and Launch Template.
-- Terminated EC2 instances.
-- Deleted Load Balancer and Target Group.
-- Removed custom Security Groups (if any).
-- Verified no running AWS resources to avoid extra charges.
+Deleted resources in order:
+1. Auto Scaling Group (terminates all instances)
+2. Launch Template
+3. Load Balancer
+4. Target Group
+5. Custom Security Groups
 
-**Screenshot Placeholder:**
+**Important**: Always verify all resources are deleted to avoid unexpected AWS charges.
 
-![Cleanup](screenshots/step6-cleanup.png)
-
----
-
-## Observations
-
-- Auto Scaling dynamically adjusts EC2 instances based on CPU utilization.
-- ALB distributes traffic evenly across healthy instances.
-- Multi-AZ deployment provides high availability and fault tolerance.
-- The stress command effectively simulated high CPU load to test scaling policies.
-- Learned the importance of resource cleanup to prevent unnecessary AWS costs.
+![Cleanup Complete](screenshots/step6-cleanup.png)
 
 ---
 
-## Commands Used
+## Key Learnings
+
+✅ **Auto Scaling**: Dynamically adjusts capacity based on CPU utilization  
+✅ **High Availability**: Multi-AZ deployment prevents downtime  
+✅ **Load Balancing**: Distributes traffic evenly and removes unhealthy instances  
+✅ **Cost Optimization**: Scales down during low traffic to reduce costs  
+✅ **Automatic Recovery**: Failed instances are replaced automatically  
+
+---
+
+## Commands Reference
+
 ```bash
-# Install and use stress tool on EC2 instances
+# Stress test
 sudo yum install stress -y
-stress --cpu 4 --timeout 300s                 # Stress CPU for 5 minutes
+stress --cpu 4 --timeout 300s
 
-# Optional: Check CPU usage
+# Monitor CPU
 top
+uptime
+
+# Test ALB
+curl http://<ALB-DNS>
 ```
 
 ---
 
-## How to Use This README
+## Setup Instructions
 
-1. Keep this README in your project folder.
-2. Create a folder called `screenshots/`.
-3. After completing each step in AWS, take screenshots and save them in `screenshots/` with the same names as in the placeholders.
-4. The images will automatically appear in the README when viewed on GitHub.
+1. Create `screenshots/` folder in your project
+2. Take screenshots after each step
+3. Save with names matching placeholders above
+4. Push to GitHub - images will auto-render
+
+---
+
+## Architecture
+
+```
+Internet → ALB → Target Group → ASG → EC2 Instances (Multi-AZ)
+                                ↓
+                         CloudWatch → Scaling Policies
+```
+
+---
+
+**Date**: [Add Date]  
+**AWS Services**: EC2, Auto Scaling, ALB, CloudWatch  
+**Purpose**: Learning cloud infrastructure automation and high availability
