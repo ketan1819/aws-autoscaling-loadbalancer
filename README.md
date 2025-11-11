@@ -44,7 +44,10 @@ Configured ASG with:
 
 **How it works**: ASG maintains the desired number of healthy instances. If an instance fails, it's automatically replaced.
 
-![Auto Scaling Group](screenshots/step2_asg.png)
+![Auto Scaling Group](ASG-SS/11.png)
+![Auto Scaling Group](ASG-SS/22.png)
+![Auto Scaling Group](ASG-SS/33.png)
+![Auto Scaling Group](ASG-SS/44.png)
 
 ---
 
@@ -58,7 +61,8 @@ Created ALB and Target Group:
 
 **Purpose**: ALB distributes traffic evenly across healthy instances and provides a single DNS endpoint.
 
-![Load Balancer](screenshots/step3_alb.png)
+![Load Balancer](ASG-SS/load-balancer.png)
+
 
 ---
 
